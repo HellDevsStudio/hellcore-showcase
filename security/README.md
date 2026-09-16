@@ -41,7 +41,7 @@ function escapeHtml(value) {
 
 #### Por que isso importa (em português claro):
 * **O que é XSS (Cross-Site Scripting)?** É quando um invasor insere caracteres especiais (como `<script>` ou aspas) no nome de usuário, mensagem ou comprovante. Se o sistema apenas colar esse texto na tela, o navegador interpreta como instrução de código e pode roubar sessões de administradores.
-* **Por que importa na Hellcore?** Plataformas como Discord aceitam nomes, apelidos e mensagens com qualquer caractere Unicode ou tags HTML disfarçadas. Em visualizações web de atendimento ou recibos, isso é vetor crítico.
+* **Por que importa na Hellcore?** Plataformas como Discord aceitam nomes, apelidos e mensagens com qualquer caractere Unicode ou tags HTML disfarçadas. Em visualizações web de atendimento (acessíveis pela Staff ou via link temporário gerado sob demanda pelo atendimento), isso é vetor crítico.
 * **O que a função impede?** Transforma caracteres de controle em entidades inofensivas de texto (`<` vira `&lt;`, `"` vira `&quot;`). O texto é lido normalmente pelos olhos humanos, mas o navegador nunca o executa como código.
 
 ---
@@ -120,6 +120,7 @@ async function verifyStaffAccess(userId, { fetchMember, hasStaffRole } = {}) {
 | **Arquitetura Fail-Closed** | Toda barreira de acesso e validação de permissões falha trancando a porta, nunca liberando. |
 | **Validação Server-to-Server** | Transações e confirmações financeiras são atestadas diretamente entre servidores, sem intermediários no cliente. |
 | **Trilha de Auditoria com Identificação** | Registros de ações críticas gravam o identificador da autoridade responsável, data e contexto. |
+| **Acesso a Transcripts Web** | Acesso restrito por autenticação de Staff ou via link público temporário com chave criptográfica gerada sob demanda e revogável. |
 | **Defesa de Privacidade** | Nenhum dado confidencial de clientes, endereços de banco ou tokens são armazenados ou expostos em repositórios públicos. |
 
 ---

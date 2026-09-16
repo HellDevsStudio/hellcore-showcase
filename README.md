@@ -20,7 +20,7 @@
 
 ## 🧭 Visão Geral do Sistema
 
-A **Hellcore** é uma infraestrutura de software de alta performance projetada para operar sistemas transacionais, controle financeiro, mediação de trocas (Middleman) e atendimento de clientes em tempo real no Discord e na Web.
+A **Hellcore** é uma infraestrutura de software de alta performance projetada para operar sistemas transacionais, controle financeiro, mediação de trocas (Middleman) e atendimento de clientes em tempo real exclusivamente via Discord, apoiado por ferramentas internas de gestão para a Staff.
 
 Diferente de bots de comunidade amadores — construídos com scripts monolíticos e persistência frágil em memória —, a Hellcore adota padrões da engenharia de missão crítica: **armazenamento ACID em modo Write-Ahead Logging (WAL)**, **cálculos financeiros imutáveis em centavos inteiros**, **arquitetura de comandos desacoplada em 2 camadas** e **defesa em profundidade fail-closed**.
 
@@ -34,11 +34,11 @@ Este repositório público serve como uma **vitrine conceitual e arquitetural** 
 
 | Indicador | Padrão da Indústria / Bots Comuns | Arquitetura Hellcore |
 | :--- | :---: | :---: |
-| **Latência de Interação (p95)** | ~250ms - 800ms | **< 45ms** *(Defer imediato + Adapter leve)* |
-| **Latência de Leitura/Escrita de Dados** | 10ms - 35ms *(Bancos remotos na nuvem)* | **< 0.1ms** *(SQLite síncrono local via WAL)* |
+| **Latência de Interação (p95)** | ~250ms - 800ms | **< 45ms** *(Objetivo arquitetural / Defer imediato)* |
+| **Latência de Leitura/Escrita de Dados** | 10ms - 35ms *(Bancos remotos na nuvem)* | **< 0.1ms** *(Benchmark de query local via WAL)* |
 | **Precisão em Cálculos Financeiros** | Risco de imprecisão Float IEEE 754 | **100% Exata** *(Aritmética estrita em Integer Cents)* |
 | **Sobrevivência a Restarts Inesperados** | Perda de tickets/carrinhos em memória | **Zero Perda de Estado** *(Zero Memory State)* |
-| **Segurança contra Injeções em Web Views** | Variável ou inexistente | **100% Sanitizado** *(Higienização universal Anti-XSS)* |
+| **Segurança contra Injeções em Web Views** | Variável ou inexistente | **100% Sanitizado** *(Transcripts com acesso restrito e sob demanda)* |
 | **Tolerância a Erros de Permissão** | *Fail-Open* perigoso | **Fail-Closed Estrito** *(Na dúvida, a porta fecha)* |
 
 </div>
@@ -63,24 +63,36 @@ hellcore-showcase/
 ```
 
 ### 1. 🎫 Motor Transacional de Atendimento & Tickets
-* Atendimento automatizado categorizado com isolamento por canal.
+* Atendimento automatizado categorizado com isolamento por canal no Discord.
 * Logs estruturados vinculando cada operação à autoridade responsável e data/hora UTC.
-* Fechamento com geração automatizada de transcripts web estáticos.
+* Fechamento com geração automatizada de transcripts web. **Acesso restrito à Staff**; o cliente pode receber um **link de acesso temporário** gerado sob demanda pelo atendimento.
 
 ### 2. 🤝 Sistema de Mediação Segura (Middleman Engine)
-* Fluxo em etapas blindadas para mediação de itens e negociações de alto valor.
+* Fluxo em etapas blindadas para mediação de itens e negociações de alto valor via Discord.
 * Travamento atômico de estados para impedir que ambas as partes confirmem simultaneamente sem validação prévia.
 * Trilha de auditoria integral com link de transcript inviolável para resolução de disputas.
 
-### 3. 📜 Pipeline de Transcripts Web Sanitizados
-* Converte chats do Discord em páginas web leves, com tema visual Crimson Forge e preservação de anexos.
+### 3. 📜 Pipeline de Transcripts Web Sanitizados (Acesso Restrito)
+* Converte sessões de atendimento do Discord em páginas web navegáveis, com tema visual Crimson Forge e preservação de anexos.
+* **Controle de Acesso Restrito**: Exclusivo para auditoria da Staff via autenticação; clientes podem receber um link temporário com chave criptográfica sob demanda.
 * Sanitização obrigatória de nomes de usuário e mensagens via [`escapeHtml`](./security/escape-html.js) antes de qualquer renderização.
-* Autenticação via tokens efêmeros de acesso e visualização em modo somente-leitura.
 
 ### 4. ⚡ Ledger Transacional Idempotente
-* Abertura e reserva de itens com chave única de idempotência (`${id}_${hash}`).
+* Abertura e reserva de itens com chave única de idempotência baseada em tupla índice+hash.
 * Leases atômicos no banco de dados para anular duplicações causadas por múltiplos cliques ou webhooks repetidos.
 * Operações matemáticas 100% protegidas contra floating-point bugs.
+
+---
+
+## 🚀 Roadmap de Evolução
+
+A Hellcore segue uma estratégia de engenharia incremental e disciplinada. Nossos próximos passos planejados incluem:
+
+- 🌐 **Plataforma Web Pública para Clientes (Em Planejamento)**: Expansão do ecossistema para interfaces web públicas de autoatendimento, mantendo paridade com o bot do Discord.
+- 🎮 **Expansão Multijogos**: Adaptação dos motores de mediação e catálogo para suportar novos títulos e economias virtuais.
+- 🧠 **Mecanismo de Precificação Dinâmica & Recomendação**: Algoritmos preditivos de liquidez e sugestão de itens em tempo real.
+
+> *Nota de Transparência: A interface pública ativa hoje é 100% operada via Discord. Recursos web listados no Roadmap estão em fase de arquitetura e planejamento.*
 
 ---
 

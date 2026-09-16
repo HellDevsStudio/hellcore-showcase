@@ -20,7 +20,7 @@ Na grande maioria dos bots de Discord amadores ou de código aberto, os comandos
 
 ### Por que esse padrão quebra em produção?
 1. **Zero Testabilidade**: Para testar uma simples regra de desconto ou estoque, é necessário mockar 15 propriedades complexas do objeto `interaction` do Discord.js.
-2. **Acoplamento Extremo**: Se você quiser disparar a mesma ação a partir de um Webhook HTTP (ex: confirmação de pagamento do Mercado Pago) ou do Dashboard Web, o código precisa ser duplicado ou reescrito.
+2. **Acoplamento Extremo**: Se você quiser disparar a mesma ação a partir de um Webhook HTTP (ex: confirmação de pagamento) ou do Dashboard interno da Staff, o código precisa ser duplicado ou reescrito.
 3. **Erros Silenciosos e Race Conditions**: Lógica financeira e transacional misturada com I/O de rede do Discord gera condições de corrida e vulnerabilidades de double-spending.
 
 ---
@@ -102,7 +102,7 @@ Saída esperada:
 | Aspecto | Anti-Padrão Monolítico | Padrão 2 Camadas Hellcore |
 | :--- | :--- | :--- |
 | **Testabilidade** | Exige mocks complexos do Discord | Testável com funções puras e dados primitivos |
-| **Reaproveitamento** | Código preso ao chat | O mesmo serviço atende Bot, Webhooks e Dashboard Web |
+| **Reaproveitamento** | Código preso ao chat | O mesmo serviço atende Bot, Webhooks e o Dashboard interno da Staff |
 | **Segurança Financeira** | Risco de double-spend por atraso de I/O | Lease atômico isolado de latências de rede |
 | **Manutenibilidade** | Mudança no Discord quebra a regra de negócio | Atualizações de UI não tocam a camada de domínio |
 | **Resiliência a Falhas** | Falhas de rede derrubam transações | Arquitetura *Fail-Closed* com fallback gracioso |

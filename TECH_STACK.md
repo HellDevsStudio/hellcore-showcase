@@ -11,7 +11,7 @@
 | **Runtime** | **Node.js (v20+ LTS)** | Execução do loop de eventos assíncrono de alto desempenho |
 | **Gateway de Mensageria** | **Discord.js (v14)** | Conexão WebSocket em tempo real com o Discord Gateway |
 | **Banco de Dados & Ledger** | **SQLite (`better-sqlite3`)** | Armazenamento síncrono local em modo Write-Ahead Logging (WAL) |
-| **Servidor Web & APIs** | **Express.js** | Servidor HTTP leve para Transcripts e Webhooks |
+| **Servidor Web & APIs** | **Express.js** | Servidor HTTP leve para Webhooks de pagamento e ferramentas internas da Staff (Transcripts restritos e Dashboard interno) |
 | **Criptografia & Assinaturas** | **Node.js `crypto` (Nativo)** | Hashing SHA-256, HMAC e comparações Timing-Safe |
 | **Gerenciador de Processos** | **PM2** | Watchdog de processo, restart automático e gerenciamento de logs |
 
@@ -25,7 +25,7 @@ Uma das decisões de engenharia mais deliberadas na Hellcore foi a utilização 
 
 #### Por que não um banco remoto tradicional?
 * **Eliminação do Network Hop**: Em um banco remoto (como Postgres ou MySQL na nuvem), cada query consome entre 5ms e 25ms apenas em latência de rede (TCP handshake, TLS e trânsito de pacotes). Em operações no Discord, onde o timeout é de 3.000ms, perder 100ms em múltiplas queries encadeadas é inaceitável. Com `better-sqlite3`, consultas ocorrem em **menos de 0,1ms** via chamadas diretas de memória mapeada.
-* **Leituras e Escritas Concorrentes sem Bloqueio**: No modo WAL, leitores nunca bloqueiam escritores e escritores nunca bloqueiam leitores. O dashboard web pode carregar relatórios pesados enquanto o bot registra dezenas de transações por segundo.
+* **Leituras e Escritas Concorrentes sem Bloqueio**: No modo WAL, leitores nunca bloqueiam escritores e escritores nunca bloqueiam leitores. O dashboard interno da Staff pode carregar relatórios pesados enquanto o bot registra dezenas de transações por segundo no Discord.
 * **Transações ACID Atômicas Reais**: Ao contrário de arquivos JSON planos que podem corromper se o processo cair no meio da gravação, o SQLite oferece atomicidade matemática — ou a transação comita 100%, ou sofre rollback limpo.
 * **Facilidade de Backup Snapshot**: Um backup completo e consistente do ecossistema pode ser gerado a qualquer instante através de snapshots atômicos de disco.
 

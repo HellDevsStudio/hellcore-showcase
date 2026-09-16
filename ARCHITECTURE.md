@@ -1,6 +1,8 @@
 # 🏛️ Arquitetura do Sistema Hellcore — Visão de Engenharia
 
 > **Documento de especificação técnica e arquitetura de alto nível do ecossistema transacional e operacional da Hellcore.**
+> 
+> **Nota de Acesso:** O painel web e os relatórios são ferramentas internas de gestão exclusivas da Staff. A interface pública de clientes é, hoje, exclusivamente o Discord. A expansão para uma plataforma web pública está em planejamento no roadmap.
 
 ---
 
@@ -8,19 +10,19 @@
 
 A arquitetura da Hellcore foi projetada para resolver um desafio crítico: **operar transações de alta frequência e atendimento de clientes em tempo real com tolerância zero a perda de dados, duplicações ou travamentos de processo.**
 
-O sistema opera sob uma arquitetura modular orientada a eventos, com desacoplamento rigoroso entre os canais de entrada (Discord Gateway, Webhooks HTTP e Dashboard) e as regras de domínio transacionais.
+O sistema opera sob uma arquitetura modular orientada a eventos, com desacoplamento rigoroso entre os canais de entrada (Discord Gateway para clientes, Webhooks HTTP de pagamento e Dashboard interno da Staff) e as regras de domínio transacionais.
 
 ```mermaid
 flowchart TB
-    subgraph Clients [Pontos de Entrada e Clientes]
-        U1[Membros / Clientes no Discord]
+    subgraph Clients [Pontos de Entrada e Atores]
+        U1[Membros / Clientes (Exclusivamente via Discord)]
         U2[Gateways de Pagamento / Webhooks Externos]
-        U3[Painel Administrativo Web / Staff]
+        U3[Staff / Painel Interno de Gestão (Restrito)]
     end
 
     subgraph Ingress [Camada de Roteamento & Adapters]
         DGW[Discord.js Gateway WebSocket]
-        EXP[Express HTTP Web Server]
+        EXP[Express HTTP Web Server (Webhooks & Staff)]
         AUTH[Auth Guards & Timing-Safe Validator]
     end
 
@@ -75,8 +77,8 @@ flowchart TB
 ### 2. Idempotência Estrita & Leases Atômicos
 * **O Problema**: Usuários com conexões lentas clicam repetidamente no botão de compra ou confirmação. Gateways de pagamento externos reenviam o mesmo webhook de confirmação até 5 vezes.
 * **A Regra Hellcore**:
-  - Toda ação de mutação exige uma chave de idempotência única (baseada em tuplas `${id}_${hash}`).
-  - O primeiro processamento adquire um **Lease Atômico** no banco de dados via instrução `INSERT` exclusiva.
+  - Toda ação de mutação exige uma chave de idempotência única (baseada em tupla índice+hash).
+  - O primeiro processamento adquire um **Lease Atômico** no banco de dados via inserção atômica exclusiva no ledger.
   - Tentativas concorrentes no mesmo milissegundo colidem na restrição de unicidade e são descartadas graciosamente, impedindo criação de tickets duplicados ou entregas duplas de produtos.
 
 ### 3. Aritmética Financeira em Centavos Inteiros (`Integer Cents`)
@@ -86,27 +88,33 @@ flowchart TB
   - Todos os valores são manipulados, calculados e persistidos em **centavos inteiros** (`R$ 10,50` é armazenado como `1050`).
   - A divisão por 100 ocorre exclusivamente no milissegundo final da renderização visual do texto.
 
-### 4. Ciclo de Vida do Web Transcript Pipeline
-Para garantir transparência, auditoria de disputas e segurança jurídica em atendimentos e intermediações, a Hellcore possui um pipeline automatizado de transcripts web:
+### 4. Ciclo de Vida do Web Transcript Pipeline (Acesso Restrito & Sob Demanda)
+Para garantir transparência, auditoria de disputas e conformidade legal em atendimentos e intermediações, a Hellcore possui um pipeline de transcripts web de alta segurança:
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Cliente as Usuário / Staff
+    actor Staff as Staff / Atendente
+    actor Cliente as Cliente (Discord)
     participant Bot as Gateway Discord
     participant Pipeline as Transcript Engine
     participant Sanitizer as Anti-XSS Sanitizer
     participant DB as SQLite Storage
-    participant Web as Web Viewer Server
+    participant Web as Web Viewer Server (Restrito)
 
-    Cliente->>Bot: Solicita encerramento do Ticket / Mediação
+    Staff->>Bot: Solicita encerramento do Ticket / Mediação
     Bot->>Pipeline: Extrai histórico de mensagens e anexos
     Pipeline->>Sanitizer: Executa higienização estrita de tags HTML e caracteres hostis
     Sanitizer-->>Pipeline: Payload sanitizado seguro
     Pipeline->>DB: Persiste snapshot imutável em disco
-    Pipeline-->>Bot: Retorna URL de auditoria com token de acesso seguro
-    Bot->>Cliente: Envia Embed de fechamento com Botão Web auditável
-    Cliente->>Web: Acessa histórico no navegador (Renderização estática isolada)
+    Pipeline-->>Bot: Registra fechamento auditado
+    Note over Staff,Web: Visualização Interna da Staff
+    Staff->>Web: Acessa histórico via sessão autenticada de Staff
+    opt Cópia Solicitada pelo Cliente
+        Staff->>Bot: Gera chave temporária de acesso sob demanda
+        Bot-->>Cliente: Entrega link seguro temporário com chave criptográfica
+        Cliente->>Web: Acessa transcrição temporária (modo somente-leitura)
+    end
 ```
 
 ---

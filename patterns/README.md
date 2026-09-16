@@ -11,7 +11,7 @@ Aqui documentamos os princípios arquiteturais e convenções de código que dif
 ### 1. [⚔️ Padrão de Slash Command em 2 Camadas](./slash-command-2-layer.md)
 * **Problema Resolvido**: Desacoplamento entre o protocolo do Discord (`Interaction Adapter`) e as regras de negócio puras (`Domain Service`).
 * **Código Demonstrativo**: [`slash-command-example.js`](./slash-command-example.js) (Autocontido e testável via `node patterns/slash-command-example.js`).
-* **Benefícios**: Testabilidade unitária sem mocks do Discord, cálculos financeiros à prova de falhas com centavos inteiros e reaproveitamento do mesmo serviço para APIs Web e Webhooks.
+* **Benefícios**: Testabilidade unitária sem mocks do Discord, cálculos financeiros à prova de falhas com centavos inteiros e reaproveitamento do mesmo serviço para APIs internas da Staff e Webhooks.
 
 ---
 
