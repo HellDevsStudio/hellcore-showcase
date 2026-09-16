@@ -86,11 +86,6 @@ function safeCompare(provided, stored) {
 // (rede, timeout, erro transitório), o acesso é NEGADO — nunca concedido.
 // Dúvida em gate de segurança fecha a porta. Sempre.
 
-```javascript
-// Princípio: se a verificação de permissão FALHA por qualquer motivo
-// (rede, timeout, erro transitório), o acesso é NEGADO — nunca concedido.
-// Dúvida em gate de segurança fecha a porta. Sempre.
-
 async function verifyStaffAccess(userId, { fetchMember, hasStaffRole } = {}) {
   try {
     // Injeção de dependência / abstração do provedor de identidade
