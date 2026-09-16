@@ -31,18 +31,18 @@ Na Hellcore, todo comando transacional e administrativo adota rigorosamente a se
 
 ```mermaid
 flowchart TD
-    subgraph Discord_Gateway [Camada 1: Interaction Adapter]
-        A[Discord Slash Command] --> B[deferReply - Ephemeral Guard]
-        B --> C[Option Parser & DTO Builder]
-        C --> D[Domain Service Invocation]
-        H[Presentation Mapper] --> I[Discord Embed Response]
+    subgraph Discord_Gateway ["Camada 1: Interaction Adapter"]
+        A["Discord Slash Command"] --> B["deferReply - Ephemeral Guard"]
+        B["deferReply - Ephemeral Guard"] --> C["Option Parser & DTO Builder"]
+        C["Option Parser & DTO Builder"] --> D["Domain Service Invocation"]
+        H["Presentation Mapper"] --> I["Discord Embed Response"]
     end
 
-    subgraph Core_Engine [Camada 2: Domain Service]
-        D --> E[Input & Schema Validation]
-        E --> F[Integer Cents Arithmetic]
-        F --> G[Atomic Storage Lease / ACID DB]
-        G --> H
+    subgraph Core_Engine ["Camada 2: Domain Service"]
+        D --> E["Input & Schema Validation"]
+        E["Input & Schema Validation"] --> F["Integer Cents Arithmetic"]
+        F["Integer Cents Arithmetic"] --> G["Atomic Storage Lease / ACID DB"]
+        G["Atomic Storage Lease / ACID DB"] --> H
     end
 
     style Discord_Gateway fill:#11131b,stroke:#ff2d40,stroke-width:2px,color:#fff

@@ -14,28 +14,28 @@ O sistema opera sob uma arquitetura modular orientada a eventos, com desacoplame
 
 ```mermaid
 flowchart TB
-    subgraph Clients [Pontos de Entrada e Atores]
-        U1[Membros / Clientes (Exclusivamente via Discord)]
-        U2[Gateways de Pagamento / Webhooks Externos]
-        U3[Staff / Painel Interno de Gestão (Restrito)]
+    subgraph Clients ["Pontos de Entrada e Atores"]
+        U1["Membros / Clientes (Exclusivamente via Discord)"]
+        U2["Gateways de Pagamento / Webhooks Externos"]
+        U3["Staff / Painel Interno de Gestão (Restrito)"]
     end
 
-    subgraph Ingress [Camada de Roteamento & Adapters]
-        DGW[Discord.js Gateway WebSocket]
-        EXP[Express HTTP Web Server (Webhooks & Staff)]
-        AUTH[Auth Guards & Timing-Safe Validator]
+    subgraph Ingress ["Camada de Roteamento & Adapters"]
+        DGW["Discord.js Gateway WebSocket"]
+        EXP["Express HTTP Web Server (Webhooks & Staff)"]
+        AUTH["Auth Guards & Timing-Safe Validator"]
     end
 
-    subgraph Core [Camada de Serviços & Motores de Domínio]
-        TKT[Ticket & Vendas Engine]
-        ESC[Middleman Escrow / Mediação Engine]
-        TRX[Ledger Transacional & Idempotência]
-        TRS[Web Transcripts & Sanitization Pipeline]
+    subgraph Core ["Camada de Serviços & Motores de Domínio"]
+        TKT["Ticket & Vendas Engine"]
+        ESC["Middleman Escrow / Mediação Engine"]
+        TRX["Ledger Transacional & Idempotência"]
+        TRS["Web Transcripts & Sanitization Pipeline"]
     end
 
-    subgraph Persistence [Camada de Persistência & Auditoria]
-        SQL[(SQLite em Modo WAL - better-sqlite3)]
-        AUD[Structured Event Logs / Auditoria Gravada]
+    subgraph Persistence ["Camada de Persistência & Auditoria"]
+        SQL[("SQLite em Modo WAL - better-sqlite3")]
+        AUD["Structured Event Logs / Auditoria Gravada"]
     end
 
     U1 --> DGW
@@ -95,12 +95,12 @@ Para garantir transparência, auditoria de disputas e conformidade legal em aten
 sequenceDiagram
     autonumber
     actor Staff as Staff / Atendente
-    actor Cliente as Cliente (Discord)
+    actor Cliente as Cliente via Discord
     participant Bot as Gateway Discord
     participant Pipeline as Transcript Engine
     participant Sanitizer as Anti-XSS Sanitizer
     participant DB as SQLite Storage
-    participant Web as Web Viewer Server (Restrito)
+    participant Web as Web Viewer Server Restrito
 
     Staff->>Bot: Solicita encerramento do Ticket / Mediação
     Bot->>Pipeline: Extrai histórico de mensagens e anexos
