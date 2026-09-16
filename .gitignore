@@ -50,9 +50,13 @@ backup/
 backups/
 Backup*/
 
-# Logs e Processos
+# Logs, Processos e Relatórios
 logs/
 *.log
+*.txt
+*.dump
+*.diff
+*.patch
 .pm2/
 pids/
 *.pid
