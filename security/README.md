@@ -86,21 +86,33 @@ function safeCompare(provided, stored) {
 // (rede, timeout, erro transitório), o acesso é NEGADO — nunca concedido.
 // Dúvida em gate de segurança fecha a porta. Sempre.
 
-async function verifyStaffAccess(userId) {
+```javascript
+// Princípio: se a verificação de permissão FALHA por qualquer motivo
+// (rede, timeout, erro transitório), o acesso é NEGADO — nunca concedido.
+// Dúvida em gate de segurança fecha a porta. Sempre.
+
+async function verifyStaffAccess(userId, { fetchMember, hasStaffRole } = {}) {
   try {
+    // Injeção de dependência / abstração do provedor de identidade
+    if (typeof fetchMember !== 'function' || typeof hasStaffRole !== 'function') {
+      throw new Error('Identity provider dependencies not provided');
+    }
+
     const member = await fetchMember(userId);
-    return hasStaffRole(member);      // verificação real
+    return Boolean(hasStaffRole(member)); // verificação real
   } catch (error) {
     console.warn('[ACCESS] verification failed — access denied');
-    return false;                     // FAIL-CLOSED: erro = negado
+    return false;                         // FAIL-CLOSED: erro = negado
   }
 }
 ```
 
 #### Por que isso importa (em português claro):
 * **O que é o padrão Fail-Closed (Falha Fechada)?** Na engenharia de segurança, existem dois caminhos quando algo quebra: *Fail-Open* (a catraca abre para não travar o fluxo) ou *Fail-Closed* (a porta do cofre tranca e ninguém passa). Em segurança financeira e administrativa, sistemas *Fail-Open* são catastróficos.
+* **Por que injeção de dependência com validação estrita?** Ao receber os provedores de identidade (`fetchMember`, `hasStaffRole`) como parâmetros, a função desacopla o contrato do ambiente e trata a ausência ou má configuração de provedores como falha de segurança imediata no `try`, acionando o fallback fechado.
 * **O que acontece em caso de falha transitória?** Se a API externa oscilar ou ocorrer timeout enquanto o sistema checa se quem está clicando é um moderador, o sistema NUNCA assume "talvez seja". A resposta padrão é negar o privilégio.
-* **O que a função garante?** O privilégio só existe quando a autorização for confirmada de ponta a ponta com 100% de sucesso. Em qualquer outro cenário — erro, timeout ou anomalia — a resposta é `false`.
+* **O que a função garante?** O privilégio só existe quando a autorização for confirmada de ponta a ponta com 100% de sucesso. Em qualquer outro cenário — erro, timeout, dependência ausente ou anomalia — a resposta é `false`.
+
 
 ---
 
