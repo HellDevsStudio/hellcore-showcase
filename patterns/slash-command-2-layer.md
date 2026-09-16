@@ -68,7 +68,7 @@ flowchart TD
 * **O que faz**:
   1. Valida invariantes do domínio (quantidades positivas, limites de estoque, concorrência).
   2. Executa todos os cálculos financeiros em **centavos inteiros (`Integer Cents`)** para anular imprecisões de ponto flutuante IEEE 754.
-  3. Realiza o lock atômico ou transação no SQLite (`better-sqlite3`).
+  3. Realiza o lease atômico ou transação no motor de armazenamento com garantias ACID.
   4. Retorna um objeto de resultado neutro e previsível.
 * **O que NUNCA faz**: Nenhuma importação do Discord.js, nenhuma menção a `interaction`, `channel`, `guild` ou `client`.
 

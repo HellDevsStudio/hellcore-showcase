@@ -34,7 +34,7 @@ flowchart TB
     end
 
     subgraph Persistence ["Camada de Persistência & Auditoria"]
-        SQL[("SQLite em Modo WAL - better-sqlite3")]
+        SQL[("Embedded Storage Engine (ACID Transactional)")]
         AUD["Structured Event Logs / Auditoria Gravada"]
     end
 
@@ -69,9 +69,9 @@ flowchart TB
 ## 🛡️ Pilares Arquiteturais Fundamentais
 
 ### 1. Zero Memory State (Estado em Memória é Risco)
-* **O Problema**: Em bots tradicionais, tickets abertos, saldos e carrinhos são mantidos em variáveis globais de memória (`const tickets = {}`). Se o processo reiniciar via PM2, sofrer manutenção ou cair por falta de energia, **todo o estado é corrompido ou perdido**.
+* **O Problema**: Em bots tradicionais, tickets abertos, saldos e carrinhos são mantidos em variáveis globais de memória (`const tickets = {}`). Se o processo reiniciar inesperadamente, sofrer manutenção ou cair por falta de energia, **todo o estado é corrompido ou perdido**.
 * **A Regra Hellcore**: Nenhum estado de negócio existe exclusivamente na memória volátil. 
-  - Toda transição de estado (abertura de ticket, reserva de item, confirmação de intermediação) é gravada **sincronamente no SQLite em modo WAL** antes que a interface receba a confirmação.
+  - Toda transição de estado (abertura de ticket, reserva de item, confirmação de intermediação) é gravada **sincronamente em armazenamento local com garantias ACID** antes que a interface receba a confirmação.
   - Se o processo for encerrado abruptamente no meio de uma operação, o reinício reconstrói o estado com fidelidade atômica a partir do disco.
 
 ### 2. Idempotência Estrita & Leases Atômicos
@@ -99,7 +99,7 @@ sequenceDiagram
     participant Bot as Gateway Discord
     participant Pipeline as Transcript Engine
     participant Sanitizer as Anti-XSS Sanitizer
-    participant DB as SQLite Storage
+    participant DB as Storage Engine (ACID)
     participant Web as Web Viewer Server Restrito
 
     Staff->>Bot: Solicita encerramento do Ticket / Mediação
@@ -134,8 +134,8 @@ sequenceDiagram
 ## 📊 Métricas Arquiteturais de Escala
 
 * **Throughput de Eventos**: Capaz de processar centenas de interações concorrentes no Discord Gateway sem degradação perceptível de loop de eventos.
-* **Tempo de Resposta Médio**: Latência p95 < 45ms para interações com resposta efêmera inicial.
-* **Atomicidade de Armazenamento**: Modo Write-Ahead Logging (WAL) do SQLite garante leituras não-bloqueantes concorrentes com escritas seriais seguras.
+* **Responsividade Desacoplada**: Resposta defensiva imediata via defer efêmero de alta prioridade na camada de adapter.
+* **Atomicidade de Armazenamento**: Persistência transacional com garantias ACID assegura leituras isoladas concorrentes com escritas atômicas e proteção contra restarts.
 * **Auditoria Contínua**: 100% dos eventos administrativos e transacionais gravam o identificador da autoridade responsável, carimbo de data/hora UTC e dados contextuais.
 
 ---

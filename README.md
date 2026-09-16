@@ -5,7 +5,7 @@
 
 [![Node.js Version](https://img.shields.io/badge/Node.js-v20%2B_LTS-339933?logo=node.js&logoColor=white)](https://nodejs.org)
 [![Discord.js](https://img.shields.io/badge/Discord.js-v14-5865F2?logo=discord&logoColor=white)](https://discord.js.org)
-[![Storage Engine](https://img.shields.io/badge/Storage-SQLite_WAL_(better--sqlite3)-003B57?logo=sqlite&logoColor=white)](https://github.com/WiseLibs/better-sqlite3)
+[![Storage Engine](https://img.shields.io/badge/Storage-Embedded_ACID_Engine-003B57)](./ARCHITECTURE.md)
 [![Security Standard](https://img.shields.io/badge/Security-Fail--Closed_&_Timing--Safe-ff2d40)](./security/README.md)
 [![Architecture Pattern](https://img.shields.io/badge/Architecture-2--Layer_Decoupled-00ff88)](./patterns/slash-command-2-layer.md)
 
@@ -22,7 +22,7 @@
 
 A **Hellcore** é uma infraestrutura de software de alta performance projetada para operar sistemas transacionais, controle financeiro, mediação de trocas (Middleman) e atendimento de clientes em tempo real exclusivamente via Discord, apoiado por ferramentas internas de gestão para a Staff.
 
-Diferente de bots de comunidade amadores — construídos com scripts monolíticos e persistência frágil em memória —, a Hellcore adota padrões da engenharia de missão crítica: **armazenamento ACID em modo Write-Ahead Logging (WAL)**, **cálculos financeiros imutáveis em centavos inteiros**, **arquitetura de comandos desacoplada em 2 camadas** e **defesa em profundidade fail-closed**.
+Diferente de bots de comunidade amadores — construídos com scripts monolíticos e persistência frágil em memória —, a Hellcore adota padrões da engenharia de missão crítica: **armazenamento local transacional com garantias ACID**, **cálculos financeiros imutáveis em centavos inteiros**, **arquitetura de comandos desacoplada em 2 camadas** e **defesa em profundidade fail-closed**.
 
 Este repositório público serve como uma **vitrine conceitual e arquitetural** para que clientes, desenvolvedores e parceiros possam auditar nossos padrões de confiabilidade sem expor segredos industriais.
 
@@ -34,8 +34,8 @@ Este repositório público serve como uma **vitrine conceitual e arquitetural** 
 
 | Indicador | Padrão da Indústria / Bots Comuns | Arquitetura Hellcore |
 | :--- | :---: | :---: |
-| **Latência de Interação (p95)** | ~250ms - 800ms | **< 45ms** *(Objetivo arquitetural / Defer imediato)* |
-| **Latência de Leitura/Escrita de Dados** | 10ms - 35ms *(Bancos remotos na nuvem)* | **< 0.1ms** *(Benchmark de query local via WAL)* |
+| **Responsividade de Interação** | Risco de timeout (3s) do Gateway | **Imediata** *(Defer defensivo em Camada de Adapter)* |
+| **Persistência de Dados** | Perda de estado e transações em crashes | **Garantia ACID** *(Transações atômicas com persistência em disco)* |
 | **Precisão em Cálculos Financeiros** | Risco de imprecisão Float IEEE 754 | **100% Exata** *(Aritmética estrita em Integer Cents)* |
 | **Sobrevivência a Restarts Inesperados** | Perda de tickets/carrinhos em memória | **Zero Perda de Estado** *(Zero Memory State)* |
 | **Segurança contra Injeções em Web Views** | Variável ou inexistente | **100% Sanitizado** *(Transcripts com acesso restrito e sob demanda)* |
@@ -104,7 +104,7 @@ Mergulhe nos documentos técnicos que detalham a engenharia por trás do sistema
    *Diagramas Mermaid de alto nível, fluxo de transações, modelo de isolamento de processos e filosofia Zero Memory State.*
 
 2. [🛠️ **Stack Tecnológica & Racional (`TECH_STACK.md`)**](./TECH_STACK.md)  
-   *Por que escolhemos SQLite WAL em vez de bancos remotos, por que centavos inteiros são inegociáveis e nossa visão sobre monólitos modulares de alta performance.*
+   *Os princípios por trás do armazenamento local com garantias ACID, por que centavos inteiros são inegociáveis e nossa visão sobre simplicidade arquitetural de alta confiabilidade.*
 
 3. [⚔️ **Padrão de Slash Command em 2 Camadas (`patterns/`)**](./patterns/slash-command-2-layer.md)  
    *O anti-padrão dos bots amadores vs o desacoplamento de Adapters de Apresentação e Serviços de Domínio Puros (com exemplo em código executável em [`patterns/slash-command-example.js`](./patterns/slash-command-example.js)).*
